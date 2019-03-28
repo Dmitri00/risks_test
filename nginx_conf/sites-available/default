@@ -1,0 +1,62 @@
+server {
+
+	root /var/www/html;
+
+	index index.php index.html index.htm index.nginx-debian.html;
+
+	server_name music365.pro;
+#	flexlab01.westeurope.cloudapp.azure.com;
+
+	client_max_body_size 35M;
+
+
+
+	location / {
+		try_files $uri $uri/ /index.php;
+	}
+
+	location ~ \.php$ {
+
+	    auth_basic            "Basic Auth";
+            auth_basic_user_file  "/etc/nginx/.htpasswd";
+
+	    root           /var/www/html/;
+            try_files $uri =404;
+            fastcgi_pass   unix:/run/php/php7.2-fpm.sock;
+            fastcgi_index  index.php;
+            fastcgi_param  SCRIPT_FILENAME  $document_root$fastcgi_script_name;
+            include        fastcgi_params;
+            fastcgi_buffer_size 128k;
+            fastcgi_buffers 256 4k;
+            fastcgi_busy_buffers_size 256k;
+            fastcgi_temp_file_write_size 256k;
+	}
+
+	location ~ /\.ht {
+		deny all;
+	}
+
+
+    listen [::]:443 ssl ipv6only=on; # managed by Certbot
+    listen 443 ssl; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/music365.pro/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/music365.pro/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+
+}
+server {
+    if ($host = music365.pro) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+
+	listen 80 default_server;
+	listen [::]:80 default_server;
+
+	server_name music365.pro
+#	flexlab01.westeurope.cloudapp.azure.com;
+    return 404; # managed by Certbot
+
+
+}
